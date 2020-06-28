@@ -1,0 +1,217 @@
+local M = {}
+
+local metadata = {
+	fn_name = "",
+
+	["eq"] = {
+		count = 0
+	},
+
+	["lt"] = {
+		count = 0
+	},
+
+	["gt"] = {
+		count = 0
+	},
+
+	["function"] = {
+		count = 0
+	},
+
+	["call"] = {
+		count = 0
+	}
+}
+
+local function fixed (str)
+	local function fmt_constant (arg)
+		return str:format(arg)
+	end
+
+	local function fmt_static (arg, filename)
+		return str:format(filename.."."..arg)
+	end
+
+	local function fmt_pointer (arg)
+		return str:format((arg == "0" and "THIS") or (arg == "1" and "THAT"))
+	end
+
+	local function fmt_temp (arg)
+		return str:format("R"..tostring(tonumber(arg) + 5))
+	end
+
+	return {
+		fmt_constant = fmt_constant,
+		fmt_static = fmt_static,
+		fmt_pointer = fmt_pointer,
+		fmt_temp = fmt_temp
+	}
+end
+
+local function var (str)
+	local function fmt_var (arg, pointer)
+		return str:format(arg, pointer)
+	end
+
+	return {
+		fmt_var = fmt_var
+	}
+end
+
+
+-- snippets are displayed in source as being separated by ' ', not '\n'
+local snippets = {
+	CONST_PUSH = fixed "@%s D=A @SP A=M M=D @SP M=M+1 ",
+	FIXED_PUSH = fixed "@%s D=M @SP A=M M=D @SP M=M+1 ",
+	FIXED_POP = fixed "@SP M=M-1 A=M D=M @%s M=D ",
+	VAR_PUSH = var "@%s D=A @%s A=D+M D=M @SP A=M M=D @SP M=M+1 ",
+	VAR_POP = var "@%s D=A @%s D=D+M @R13 M=D @SP M=M-1 A=M D=M @R13 A=M M=D "
+}
+
+-- end preamble
+
+local function init (filename)
+
+	local commands = {
+		-- Derive code for pushing onto the stack from various memory segments
+		["push"] = {
+			["constant"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.CONST_PUSH.fmt_constant(arg)
+			end}),
+
+			["static"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_PUSH.fmt_static(arg, filename)
+			end}),
+
+			["pointer"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_PUSH.fmt_pointer(arg)
+			end}),
+
+			["temp"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_PUSH.fmt_temp(arg)
+			end}),
+
+			["local"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "LCL")
+			end}),
+
+			["argument"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "ARG")
+			end}),
+
+			["this"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "THIS")
+			end}),
+
+			["that"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "THAT")
+			end}),
+		},
+
+		-- Derive code for popping from the stack onto various memory segments
+		["pop"] = {
+			["static"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_POP.fmt_static(arg, filename)
+			end}),
+
+			["pointer"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_POP.fmt_pointer(arg)
+			end}),
+
+			["temp"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_POP.fmt_temp(arg)
+			end}),
+
+			["local"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "LCL")
+			end}),
+
+			["argument"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "ARG")
+			end}),
+
+			["this"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "THIS")
+			end}),
+
+			["that"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "THAT")
+			end}),
+		},
+
+		-- Arithmetic and logic commands
+		["add"] = "@SP M=M-1 A=M D=M A=A-1 M=D+M ",
+		["and"] = "@SP M=M-1 A=M D=M A=A-1 M=D&M ",
+		["or"] = "@SP M=M-1 A=M D=M A=A-1 M=D|M ",
+		["neg"] = "@SP A=M-1 M=-M ",
+		["sub"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ",
+		["not"] = "@SP A=M-1 M=!M "
+	}
+
+	-- single-token commands that need hooks associated with them
+	local extras = {
+		["eq"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$eq.~I D;JEQ @SP A=M-1 M=0 (~F$eq.~I) ",
+
+		["lt"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$lt.~I D;JLT @SP A=M-1 M=0 (~F$lt.~I) ",
+
+		["gt"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$gt.~I D;JGT @SP A=M-1 M=0 (~F$gt.~I) "
+	}
+
+	setmetatable(commands, {__index = function (_, cmd)
+		print(cmd)
+		local snippet = extras[cmd]
+		local count = metadata[cmd].count
+
+		snippet = snippet:gsub("~F", metadata.fn_name)
+		snippet = snippet:gsub("~I", tostring(count))
+
+		metadata[cmd].count = count + 1
+
+		return snippet
+	end})
+
+	return commands
+end
+
+-- client code (testing)
+if not arg[1] then
+	print("Missing VM file")
+	os.exit()
+end
+
+local filename = arg[1]:gsub(".*/", "") -- eliminate path to file
+local c = init(filename:match("^[^%.]+")) -- keep only before dot
+
+local vm_command_pattern = "[:.$_%w]+"
+
+local function translate(line)
+	local running = c
+	local comment = "// "
+
+	for token in line:gmatch(vm_command_pattern) do
+		running = running[token]
+		comment = comment..token.." "
+	end
+
+	local code = running:gsub(" ", "\n")
+	return string.format("%s\n%s", comment, code)
+end
+
+
+local file = assert(io.open(arg[1]))
+
+for line in file:lines() do
+	line = line:gsub("//.*", "") -- delete any comments on the line
+
+	-- if line is empty, or all whitespace, skip
+	if line:match("^%s*$") then
+		goto continue
+	end
+
+	print(translate(line))
+	::continue::
+end

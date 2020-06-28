@@ -1,0 +1,18 @@
+### Based on the forth.nanorc file found at https://paste.xinu.at/wc17YG/
+
+syntax "forth" "\.(fs|4th|4mu)$"
+comment "\ "
+
+## Highlight interpreted statements.
+color brightyellow "."
+
+## Highlight stray comments, as they are a mistake.
+color brightgreen ";"
+
+## Unhighlight a properly-formed definition.
+color white start="(^| ): " end="(^|[[:space:]])+;"
+
+## Always highlight comments.
+color brightblue start="(^| )\([[:space:]]+" end="\)"
+color brightblue "\\[[:space:]]+.*$"
+

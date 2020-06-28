@@ -1,0 +1,23 @@
+
+
+: +speller ( n is between 0 and 4 inclusive --)
+	dup 0 = if
+		." zero" else
+	dup 1 = if
+		." one" else
+	dup 2 = if
+		." two" else
+	dup 3 = if
+		." three" else
+	dup 4 = if
+		." four" else
+	." out of range"
+	then then then then then drop ;
+
+0 +speller
+1 +speller
+2 +speller
+3 +speller
+4 speller
+5 speller
+-1 speller

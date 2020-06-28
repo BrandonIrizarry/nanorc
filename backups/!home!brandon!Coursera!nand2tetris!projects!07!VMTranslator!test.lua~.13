@@ -1,0 +1,45 @@
+local fixed = require "fixed"
+local heap = require "heap"
+local arith = require "arith"
+
+local commands = {
+	["push"] = {
+		-- Commands for fixed segments
+		["constant"] = fixed.push("constant"),
+		["static"] = fixed.push("static"),
+		["pointer"] = fixed.push("pointer"),
+		["temp"] = fixed.push("temp"),
+
+		-- Commands for heap segments
+		["local"] = heap.push("local"),
+		["argument"] = heap.push("argument"),
+		["this"] = heap.push("this"),
+		["that"] = heap.push("that")
+	},
+	["pop"] = {
+		-- Commands for fixed segments
+		["static"] = fixed.pop("static"),
+		["pointer"] = fixed.pop("pointer"),
+		["temp"] = fixed.pop("temp"),
+
+		-- Commands for heap segments
+		["local"] = heap.pop("local"),
+		["argument"] = heap.pop("argument"),
+		["this"] = heap.pop("this"),
+		["that"] = heap.pop("that")
+	},
+	["add"] = true,
+	["and"] = true,
+	["or"] = true,
+	["neg"] = true,
+	["sub"] = true,
+	["not"] = true,
+	["eq"] = true,
+	["gt"] = true,
+	["lt"] = true
+}
+
+print(commands["push"]["constant"]["3"])
+print(commands["pop"]["temp"]["4"])
+print(commands["pop"]["static"]["5"])
+print(commands["pop"]["local"]["3"])

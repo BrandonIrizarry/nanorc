@@ -1,0 +1,16 @@
+\ old definition but we know it works...
+\ : prepare ( n inc -- n inc n index)
+\ 	over -rot dup 0< if swap 1 swap
+\ 	else 1 -rot then ;
+
+: row ( idx base --)
+	 tuck - tuck spaces piece spaces cr ;
+
+: +triangle ( start finish --)
+	over 1- -rot do
+		dup i row
+	loop drop ;		
+
+
+1 6 triangle
+.s

@@ -1,0 +1,17 @@
+
+
+
+
+
+
+local directory = {}
+directory.push = {}
+
+directory.push = {
+	const = "a",
+	fixed = "b"
+}
+
+directory.push.static = directory.push.fixed
+
+

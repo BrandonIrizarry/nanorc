@@ -1,0 +1,16 @@
+(LISTEN)
+@color
+M=0
+@KBD
+D=M
+@PAINT
+D;JEQ
+@color
+M=-1
+
+(PAINT)
+@segment
+D=M
+@24575 // last valid screen segment in memory
+D=D-A
+

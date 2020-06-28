@@ -1,0 +1,19 @@
+: square ( n -- n * n)
+	dup * ;
+
+: sqrt ( n -- floor{sqrt{n}})	\ valid for n > 0 only
+	>r 1 begin
+		1+ dup square r@
+	> until
+	1- rdrop ;
+
+: divides ( a b -- f)
+	swap mod 0= ;
+
+: divisor ( n -- n)		\ compute smallest divisor of n
+	dup >r sqrt 1+ 2 do
+		i j divides if i leave then
+	loop r@ min ;
+
+\ 5 divisor . cr .s
+49 divisor . cr .s

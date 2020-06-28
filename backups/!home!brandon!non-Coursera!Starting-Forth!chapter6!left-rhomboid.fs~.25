@@ -1,0 +1,19 @@
+\ Problem 3
+\ Now create a word named \STARS which will print a skewed array of stars
+\ (a rhomboid), given the height on the stack. Use a DO loop, and, for 
+\ simplicity, make the width a constant ten stars.
+
+s" stars.fs" included 
+
+: indent ( n --) \ print n spaces
+	spaces ;
+
+: row ( --)
+	10 stars ;
+
+: \stars ( height --)
+	0 do
+		i indent row cr
+	loop drop ;
+
+3 \stars

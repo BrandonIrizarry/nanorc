@@ -1,0 +1,15 @@
+
+
+
+local metadata = require("commands").metadata
+
+local filepath = arg[1]
+local basename = filepath:gsub(".*/", "")
+local filename = basename:match("[^.]+")
+
+local asm_file_text = metadata[emit_from_file](metadata, filepath)
+
+print(asm_file_text)
+--assert(io.open(filename..".asm", "w"))
+
+

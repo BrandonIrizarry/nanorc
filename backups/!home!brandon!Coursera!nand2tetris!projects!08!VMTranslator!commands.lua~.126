@@ -1,0 +1,170 @@
+local M = {}
+
+local nonfixed = require "nonfixed"
+local arith = require "arith"
+local branching = require "branching"
+
+local function Fixed (str)
+	local function fmt_constant (arg)
+		return str:format(arg)
+	end
+
+	local function fmt_static (arg)
+		return str:format(filename.."."..arg)
+	end
+
+	local function fmt_pointer (arg)
+		return str:format((arg == "0" and "THIS") or (arg = "1" and "THAT"))
+	end
+
+	local function fmt_temp (arg)
+		return str:format("R"..tostring(tonumber(arg) + 5))
+	end
+
+	return {
+		fmt_constant = fmt_constant,
+		fmt_static = fmt_static,
+		fmt_pointer = fmt_pointer,
+		fmt_temp = fmt_temp
+	}
+end
+
+local function Var (str)
+	local function fmt_var (arg, pointer)
+		return str:format(arg, pointer)
+	end
+
+	return {
+		fmt_var = fmt_var
+	}
+}
+
+
+end
+local snippets = {
+	CONST_PUSH = Fixed "@%s D=A @SP A=M M=D @SP M=M+1 ",
+	FIXED_PUSH = Fixed "@%s D=M @SP A=M M=D @SP M=M+1 ",
+	FIXED_POP = Fixed "@SP M=M-1 A=M D=M @%s M=D ",
+	VAR_PUSH = Var "@%s D=A @%s A=D+M D=M @SP A=M M=D @SP M=M+1 ",
+	VAR_POP = Var "@%s D=A @%s D=D+M @R13 M=D @SP M=M-1 A=M D=M @R13 A=M M=D "
+}
+
+for key, snippet in pairs(snippets) do
+	snippet[key] = snippet[key]:gsub(" ", "\n")
+end
+
+
+
+local function init (filename)
+
+	local commands = {
+		-- Derive code for pushing onto the stack from various memory segments
+		["push"] = {
+			["constant"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.CONST_PUSH.fmt_constant(arg)
+			end}),
+
+			["static"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_PUSH.fmt_static(arg)
+			end}),
+
+			["pointer"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_PUSH.fmt_pointer(arg)
+			end}),
+
+			["temp"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_PUSH.fmt_temp(arg)
+			end}),
+
+			["local"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "LCL")
+			end}),
+
+			["argument"] = setmetatable({}. {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "ARG")
+			end}),
+
+			["this"] = setmetatable({}. {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "THIS")
+			end}),
+
+			["that"] = setmetatable({}. {__index = function (_, arg)
+				return snippets.VAR_PUSH.fmt_var(arg, "THAT")
+			end}),
+		},
+
+		-- Derive code for popping from the stack onto various memory segments
+		["pop"] = {
+			["static"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_POP.fmt_static(arg)
+			end}),
+
+			["pointer"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_POP.fmt_pointer(arg)
+			end}),
+
+			["temp"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.FIXED_POP.fmt_temp(arg)
+			end}),
+
+			["local"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "LCL")
+			end}),
+
+			["argument"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "ARG")
+			end}),
+
+			["this"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "THIS")
+			end}),
+
+			["that"] = setmetatable({}, {__index = function (_, arg)
+				return snippets.VAR_POP.fmt_var(arg, "THAT")
+			end}),
+		},
+
+		-- Arithmetic and logic commands
+		["add"] = arith.full_code["add"],
+		["and"] = arith.full_code["and"],
+		["or"] = arith.full_code["or"],
+		["neg"] = arith.full_code["neg"],
+		["sub"] = arith.full_code["sub"],
+		["not"] = arith.full_code["not"],
+
+		-- Branching commands
+		["label"] = branching.label(fn_name),
+		["goto"] = branching["goto"](fn_name),
+		["if-goto"] = branching["if-goto"](fn_name),
+
+		-- Function-call commands except 'call'
+		["function"] = setmetatable({}, {__index = function (_, fn_name)
+			return setmetatable({}, {__index = function (_, nlocals)
+
+			end})
+		end})
+
+		["return"] = setmetatable({}, {__index = function (fn_name)
+			return fcall["return"](fn_name, nargs)
+	}
+
+	-- Commands that need to keep a running index for their unique labels
+	local dynamic = {
+		-- Comparison commands
+		["eq"] = arith.cmp("eq", fn_name, index)
+		["gt"] = arith.cmp("gt", fn_name, index)
+		["lt"] = arith.cmp["lt", fn_name, index)
+
+		-- The 'call' function-call command
+		["call"] = fcall["call"](fn_name, index)
+	}
+
+	setmetatable(commands, {__index = function (_, key)
+		index = index + 1
+		return dynamic[key]
+	}
+
+	return commands
+end
+
+return M

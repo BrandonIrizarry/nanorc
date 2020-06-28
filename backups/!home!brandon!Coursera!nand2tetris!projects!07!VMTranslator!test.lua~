@@ -1,0 +1,34 @@
+local fixed = require "fixed"
+
+local commands = {
+	["push"] = {
+		["constant"] = fixed.push("constant"),
+		["static"] = fixed.push("static"),
+		["pointer"] = fixed.push("pointer"),
+		["temp"] = fixed.push("temp"),
+		["local"] = push_heap_segment("LCL"),
+		["argument"] = true,
+		["this"] = true,
+		["that"] = true
+	},
+	["pop"] = {
+		["constant"] = true,
+		["static"] = true,
+		["pointer"] = true,
+		["temp"] = true,
+		["local"] = true,
+		["argument"] = true,
+		["this"] = true,
+		["that"] = true
+	},
+	["add"] = true,
+	["and"] = true,
+	["or"] = true,
+	["neg"] = true,
+	["sub"] = true,
+	["not"] = true,
+	["eq"] = true,
+	["gt"] = true,
+	["lt"] = true
+}
+

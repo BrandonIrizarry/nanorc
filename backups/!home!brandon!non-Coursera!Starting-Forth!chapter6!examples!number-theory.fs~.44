@@ -1,0 +1,13 @@
+\ proof-of-concept template for a loop construct avoiding do...loop
+: to-5 ( --)
+	1 >r begin
+		r> \ code here
+		dup 5 < while
+	1+ >r repeat rdrop ;
+
+\ non-optimal (may check all numbers <= n)
+: divisor ( n -- divisor)
+	2 >r begin
+		dup r@ mod while
+	r> 1+ >r repeat
+	r> nip ;

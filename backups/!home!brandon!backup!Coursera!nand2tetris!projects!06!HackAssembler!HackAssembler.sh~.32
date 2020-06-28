@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+SOURCE_FILE=$1
+DEST_DIR=${2:-.}
+
+file_stub=$(basename $1)
+
+HACK_FILE=${file_stub%%.*}.hack
+
+cat $SOURCE_FILE | ./symbol_process | ./no_symbol/assemble > $HACK_FILE
+mv $HACK_FILE $DEST_DIR

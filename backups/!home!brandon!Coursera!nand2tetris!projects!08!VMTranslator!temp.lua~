@@ -1,0 +1,10 @@
+
+
+
+local x = 1
+
+
+function dothis ()
+	print(x)
+	x = x + 1
+end

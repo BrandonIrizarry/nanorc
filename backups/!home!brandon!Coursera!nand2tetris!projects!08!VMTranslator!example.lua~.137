@@ -1,0 +1,90 @@
+local lfs = require "lfs"
+
+if arg[1] then
+	_ENV[arg[1]] = arg[1] -- to specify testing-function on the command-line
+end
+
+setmetatable(_ENV, {__index = function (_, nonexistent)
+	error(string.format("nonexistent global '%s'", nonexistent), 2)
+end})
+
+local tests = {
+	["BasicLoop.vm"] = {
+		prefix = "",
+		realname = "BasicLoop",
+		extension = "vm"
+	},
+
+	["../ProgramFlow/BasicLoop.vm"] = {
+		prefix = "../ProgramFlow/",
+		realname = "BasicLoop",
+		extension = "vm"
+	},
+
+	NestedCall = {
+		prefix = "",
+		realname = "NestedCall",
+		extension = ""
+	},
+
+	["NestedCall/"] = {
+		prefix = "",
+		realname = "NestedCall",
+		extension = ""
+	},
+
+	["../FunctionCalls/NestedCall/"] = {
+		prefix = "../FunctionCalls/",
+		realname = "NestedCall",
+		extension = ""
+	},
+
+	["../FunctionCalls/NestedCall"] = {
+		prefix = "../FunctionCalls/",
+		realname = "NestedCall",
+		extension = ""
+	}
+}
+
+local BASENAME_PATTERN = "(.-/?)([^/]+)/?$"
+
+local function prefix_rest (input)
+	local prefix, rest = input:match(BASENAME_PATTERN)
+	return prefix, rest
+end
+
+-- Assumes you've given it a valid filename, without the path to it
+--[[
+local function realname_extension (rest)
+--	local realname, extension = rest:match("(.*)%.([^.]+$"
+	local realname, extension = rest:match("(.*)%.(.*)$")
+	return realname, extension
+end
+]]
+
+local function get_extension (basename)
+	return basename:match("[^./]+$")
+end
+
+function first_test ()
+	for test, should in pairs(tests) do
+		local a, b = prefix_rest(test)
+		local c, d = realname_extension
+		print(test)
+		io.write(string.format("a=%s\nb=%s\n",a, b))
+		print()
+	end
+end
+
+function main_test ()
+	for test, should in pairs(tests) do
+		local prefix, realname, extension = parse_cli_input(test)
+
+		print(test)
+		print("prefix=", prefix, "realname=", realname, "extension=", extension)
+		print()
+		assert(prefix == should.prefix)
+		assert(realname == should.realname)
+		assert(extension == should.extension)
+	end
+end

@@ -1,0 +1,115 @@
+local M = {}
+
+local fixed = require "fixed"
+local nonfixed = require "nonfixed"
+local arith = require "arith"
+local branching = require "branching"
+local snippets = require "snippets"
+
+local fn_name
+
+
+local function init (filename)
+
+	local commands = {
+		["push"] = {
+
+			["constant"] = setmetatable({}, {__index = function (_, arg)
+				return string.format([[
+					@%s
+					D=A
+					@SP
+					A=M
+					M=D
+					@SP
+					M=M+1]], arg)
+			end}),
+
+			["static"] = setmetatable({}, {__index = function (_, arg)
+				return string.format([[
+					@%s
+					D=M
+					@SP
+					A=M
+					M=D
+					@SP
+					M=M+1]], filename.."."..arg)
+
+			end}),
+
+			["pointer"] = setmetatable({}, {__index = function (_, arg)
+				return string.format([[
+					@%s
+					D=M
+					@SP
+					A=M
+					M=D
+					@SP
+					M=M+1]], (arg == "0" and "THIS") or (arg == "1" and "THAT"))
+			end}),
+
+			["temp"] = fixed.push("temp"),
+
+			-- Commands for nonfixed segments
+			["local"] = nonfixed.push("local"),
+			["argument"] = nonfixed.push("argument"),
+			["this"] = nonfixed.push("this"),
+			["that"] = nonfixed.push("that")
+		},
+		["pop"] = {
+			-- Commands for fixed segments
+			["static"] = fixed.pop("static", filename),
+			["pointer"] = fixed.pop("pointer"),
+			["temp"] = fixed.pop("temp"),
+
+			-- Commands for nonfixed segments
+			["local"] = nonfixed.pop("local"),
+			["argument"] = nonfixed.pop("argument"),
+			["this"] = nonfixed.pop("this"),
+			["that"] = nonfixed.pop("that")
+		},
+
+		-- Arithmetic and logic commands
+		["add"] = arith.full_code["add"],
+		["and"] = arith.full_code["and"],
+		["or"] = arith.full_code["or"],
+		["neg"] = arith.full_code["neg"],
+		["sub"] = arith.full_code["sub"],
+		["not"] = arith.full_code["not"],
+
+		-- Branching commands
+		["label"] = branching.label(fn_name),
+		["goto"] = branching["goto"](fn_name),
+		["if-goto"] = branching["if-goto"](fn_name),
+
+		-- Function-call commands except 'call'
+		["function"] = setmetatable({}, {__index = function (_, fn_name)
+			return setmetatable({}, {__index = function (_, nlocals)
+
+			end})
+		end})
+
+		["return"] = setmetatable({}, {__index = function (fn_name)
+			return fcall["return"](fn_name, nargs)
+	}
+
+	-- Commands that need to keep a running index for their unique labels
+	local dynamic = {
+		-- Comparison commands
+		["eq"] = arith.cmp("eq", fn_name, index)
+		["gt"] = arith.cmp("gt", fn_name, index)
+		["lt"] = arith.cmp["lt", fn_name, index)
+
+		-- The 'call' function-call command
+		["call"] = fcall["call"](fn_name, index)
+	}
+
+	setmetatable(commands, {__index = function (_, key)
+		index = index + 1
+		return dynamic[key]
+	}
+
+	return commands
+end
+
+return M

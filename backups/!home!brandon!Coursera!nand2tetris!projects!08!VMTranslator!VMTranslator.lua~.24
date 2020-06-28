@@ -1,0 +1,15 @@
+
+
+
+local M = require("commands")
+local emit_from_file = M.emit_from_file
+
+local filepath = arg[1]
+local basename = filepath:gsub(".*/", "")
+local filename = basename:match("[^.]+")
+
+local asm_file_text = emit_from_file(filepath)
+
+assert(io.open(filename..".asm", "w")):write(asm_file_text):close()
+
+

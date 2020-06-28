@@ -1,0 +1,7 @@
+\ Problem 7
+\ In our discussion of LEAVE we gave an example which computed 6% compound 
+\ interest on a starting balance of $1000 for 20 years or until the balance had 
+\ doubled, whichever came first. Rewrite this definition so that it will expect a 
+\ starting balance and interest rate on the stack and will LEAVE when this 
+\ starting balance has doubled. [answer]
+

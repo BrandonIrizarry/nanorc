@@ -1,0 +1,112 @@
+local constants = {
+	PUSH_CONSTANT = [[
+@%s
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+]],
+	PUSH_FIXED = [[
+@%s
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+]],
+	PUSH_VARIABLE = [[
+@%s
+D=A
+@%s
+A=D+M
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+]],
+	POP_FIXED = [[
+@SP
+M=M-1
+A=M
+D=M
+@%s
+M=D
+]],
+	POP_VARIABLE = [[
+@%s
+D=A
+@%s
+D=D+M
+@R13
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R13
+A=M
+M=D
+]],
+	ADD = [[
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=D+M
+]],
+	AND = [[
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=D&M
+]],
+	OR = [[
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=D|M
+]],
+	NEG = [[
+@SP
+A=M-1
+M=-M
+]],
+	SUB = [[
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=M-D
+]],
+	NOT = [[
+@SP
+A=M-1
+M=!M
+]],
+	VMCOMMAND_PATTERN = "[:%.$_%w]+"
+}
+
+
+constants[EQ] = constants[SUB]..
+	"@SP A=M-1 D=M M=-1 @~F$eq.~I D;JEQ @SP A=M-1 M=0 (~F$eq.~I) "
+
+-- "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+
+	LT = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$lt.~I D;JLT @SP A=M-1 M=0 (~F$lt.~I) ",
+
+	GT = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$gt.~I D;JGT @SP A=M-1 M=0 (~F$gt.~I) "
+
+

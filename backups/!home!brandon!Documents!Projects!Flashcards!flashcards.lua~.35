@@ -1,0 +1,52 @@
+local RANK = 1
+local QUESTION = 2
+local ANSWER = 3
+
+local function query (msg, menu)
+	if msg then
+		io.write(msg)
+	end
+
+	io.write("[y/n]")
+
+	repeat
+		ans = io.read()
+	until ans == "y" or ans == "n" or ans == " "
+
+	return ans == "y" or ans == " "
+end
+
+local function ask (card)
+	io.write("\n\n")
+
+	print(card[QUESTION])
+	query("Ready?")
+	print(card[ANSWER])
+
+	if query("Did you get this one?") then
+		card[RANK] = card[RANK] + 1
+	else
+		card[RANK] = 0
+	end
+end
+
+local function examine (card)
+	print(string.format("rank=%d", card[RANK]))
+	print(string.format("question=%s", card[QUESTION]))
+	print(string.format("answer=%s", card[ANSWER]))
+	print()
+end
+
+
+dofile("cards/forth.lua")
+
+
+for _, card in ipairs(data) do
+	ask(card)
+end
+
+
+for _, card in ipairs(data) do
+	examine(card)
+end
+

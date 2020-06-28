@@ -1,0 +1,25 @@
+\ old definition but we know it works...
+\ : prepare ( n inc -- n inc n index)
+\ 	over -rot dup 0< if swap 1 swap
+\ 	else 1 -rot then ;
+
+s" stars.fs" included
+
+: piece ( n --)
+	2* 1- stars ;
+
+: row ( idx base --)
+	 tuck - tuck spaces piece spaces cr ;
+
+: +triangle ( finish start --)
+	over 1- -rot do
+		dup i row
+	loop drop ;		
+
+: -triangle ( finish start --)
+1- tuck do
+	dup i row
+	-1 +loop drop ;
+
+6 1 +triangle
+1 6 -triangle

@@ -1,0 +1,14 @@
+\ Problem 3
+\ 
+\ Write a definition that "rings" your terminal's bell three times. Make sure that 
+\ there is enough of a delay between the bells so that they are distinguishable. 
+\ Each time the bell rings, the word "BEEP" should appear on the terminal screen.
+
+: bell
+	7 emit ." BEEP" cr ;
+
+
+: rings ( n --)
+	0 do bell loop ;
+
+3 rings

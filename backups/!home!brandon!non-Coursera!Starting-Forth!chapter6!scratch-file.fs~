@@ -1,0 +1,4 @@
+\ old definition but we know it works...
+\ : prepare ( n inc -- n inc n index)
+\ 	over -rot dup 0< if swap 1 swap
+\ 	else 1 -rot then ;

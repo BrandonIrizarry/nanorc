@@ -1,0 +1,314 @@
+#!/usr/bin/env lua
+
+-- push and pop for temp, pointer, static, and constant segments
+local function init_fixed ()
+	local M = {}
+
+	local template = {
+		["push"] = [[
+
+	// push %s %s
+	@%s
+	D=%s
+	@SP
+	A=M
+	M=D
+	@SP
+	M=M+1]],
+
+		["pop"] = [[
+
+	// pop %s %s
+	@SP
+	M=M-1
+	A=M
+	D=M
+	@%s
+	M=D
+	]]
+	}
+
+	local register = {
+		["temp"] = {
+			["0"] = "R5",
+			["1"] = "R6",
+			["2"] = "R7",
+			["3"] = "R8",
+			["4"] = "R9",
+			["5"] = "R10",
+			["6"] = "R11",
+			["7"] = "R12"
+		},
+
+		["pointer"] = {
+			["0"] = "THIS",
+			["1"] = "THAT"
+		},
+
+		["static"] = setmetatable({}, {__index = function (_, arg)
+			return string.format("%s.%s", "<>", arg)
+		end}),
+
+		["constant"] = setmetatable({}, {__index = function (_, arg)
+			return arg
+		end})
+	}
+
+	M.push = function (name, filename)
+		return setmetatable({}, {__index = function (_, arg)
+			local rname = register[name][arg]
+
+			if filename then
+				rname = rname:gsub("<>", filename)
+			end
+
+			return string.format(template["push"], name, arg, rname,
+				name == "constant" and "A" or "M")
+		end})
+	end
+
+	M.pop = function (name, filename)
+		return  setmetatable({}, {__index = function (_, arg)
+			local rname = register[name][arg]
+
+			if filename then
+				rname = rname:gsub("<>", filename)
+			end
+
+			return string.format(template["pop"], name, arg, rname)
+		end})
+	end
+
+	return M
+end
+
+-- push and pop for local, argument, this and that segments
+local function init_heap () -- fix name
+	local M = {}
+
+	local template = {
+		["push"] = [[
+
+	// push %s %s
+	@%s
+	D=A
+	@%s
+	A=D+M
+	D=M
+	@SP
+	A=M
+	M=D
+	@SP
+	M=M+1
+	]],
+
+		["pop"] = [[
+
+	// pop %s %s
+	@%s
+	D=A
+	@%s
+	D=D+M
+	@R13
+	M=D
+	@SP
+	M=M-1
+	A=M
+	D=M
+	@R13
+	A=M
+	M=D]]
+	}
+
+	local register = {
+		["local"] = "LCL",
+		["argument"] = "ARG",
+		["this"] = "THIS",
+		["that"] = "THAT"
+	}
+
+	M.push = function (name)
+		return setmetatable({}, {__index = function (_, arg)
+			return string.format(template["push"], name, arg, arg, register[name])
+		end})
+	end
+
+	M.pop = function (name)
+		return setmetatable({}, {__index = function (_, arg)
+			return string.format(template["pop"], name, arg, arg, register[name])
+		end})
+	end
+
+	return M
+end
+
+-- Definitions for arithmetic and boolean operators
+local function init_arith ()
+	local M = {}
+
+	-- A set of proto-commands from which the real commands are derived.
+	local proto = {
+		["nnn"] = [[
+	@SP
+	A=M-1
+	M=%sM]],
+
+		["bin"] = [[
+	@SP
+	M=M-1
+	A=M
+	D=M
+	A=A-1
+	M=%s]],
+
+		["cmp_0"] = [[
+	@SP
+	A=M-1
+	D=M
+	M=-1
+	@%s_%s
+	D;J%s
+	@SP
+	A=M-1
+	M=0
+	(%s_%s)]]
+	}
+
+	-- The real arithmetic-logic command-set
+	local commands = {}
+
+	commands["neg"] = string.format(proto["nnn"], "-")
+	commands["not"] = string.format(proto["nnn"], "!")
+	commands["add"] = string.format(proto["bin"], "D+M")
+	commands["and"] = string.format(proto["bin"], "D&M")
+	commands["or"] = string.format(proto["bin"], "D|M")
+	commands["sub"] = string.format(proto["bin"], "M-D")
+
+
+	local branch_type = {
+		["eq"] = "EQ",
+		["gt"] = "GT",
+		["lt"] = "LT"
+	}
+
+	M.branch = function (cmd, count)
+		local snippet = string.format("%s\n%s", commands["sub"],
+			string.format(proto["cmp_0"], cmd, tostring(count), branch_type[cmd],
+				cmd, tostring(count)))
+
+		-- workaround to achieve the correct comment for comparison operators
+		snippet = snippet:gsub("// sub", string.format("// %s", cmd))
+
+		return snippet
+	end
+
+	-- Now add the comment for each snippet
+	for cmd in pairs(commands) do
+		local comment = string.format("\n// %s\n", cmd)
+
+		commands[cmd] = comment .. commands[cmd]
+	end
+
+	M.commands = commands
+
+	return M
+end
+
+-- Resolve each VM command into a table-lookup, and write corresponding code
+local function init_commands (filename)
+	local fixed = init_fixed()
+	local heap = init_heap()
+	local arith = init_arith()
+
+	local commands = {
+		["push"] = {
+			-- Commands for fixed segments
+			["constant"] = fixed.push("constant"),
+			["static"] = fixed.push("static", filename),
+			["pointer"] = fixed.push("pointer"),
+			["temp"] = fixed.push("temp"),
+
+			-- Commands for heap segments
+			["local"] = heap.push("local"),
+			["argument"] = heap.push("argument"),
+			["this"] = heap.push("this"),
+			["that"] = heap.push("that")
+		},
+		["pop"] = {
+			-- Commands for fixed segments
+			["static"] = fixed.pop("static", filename),
+			["pointer"] = fixed.pop("pointer"),
+			["temp"] = fixed.pop("temp"),
+
+			-- Commands for heap segments
+			["local"] = heap.pop("local"),
+			["argument"] = heap.pop("argument"),
+			["this"] = heap.pop("this"),
+			["that"] = heap.pop("that")
+		},
+
+		-- Arithmetic and logic commands
+		["add"] = arith.commands["add"],
+		["and"] = arith.commands["and"],
+		["or"] = arith.commands["or"],
+		["neg"] = arith.commands["neg"],
+		["sub"] = arith.commands["sub"],
+		["not"] = arith.commands["not"],
+
+		-- 
+	}
+
+	-- Ensure unique labels in stack comparison-operators
+	local count = 0
+
+	-- Comparison commands are deliberately absent from 'commands',
+	-- so that they can trigger this metatable (which we need to
+	-- ensure the unique labels)
+	setmetatable(commands, {__index = function (_, cmd)
+		local snippet = arith.branch(cmd, count)
+		count = count + 1
+
+		return snippet
+	end})
+
+	return commands
+end
+
+
+-- Process a VM file
+local file = assert(io.open(arg[1]))
+
+local filename = arg[1]:gsub(".*/", "")
+filename = filename:match("^[^%.]+")
+
+
+local commands = init_commands(filename)
+
+
+local buffer = {}
+for line in file:lines() do
+	line = line:gsub("//.*", "")
+
+	-- If line is empty, or all whitespace, skip
+	if line:match("^%s*$") then
+		goto continue
+	end
+
+	local accessed = commands
+
+	for token in line:gmatch("%w+") do
+		accessed = accessed[token]
+	end
+
+	buffer[#buffer + 1] = accessed
+	::continue::
+end
+
+local out_asm = assert(io.open(filename..".asm", "w"))
+
+buffer[#buffer + 1] = ""
+final_product = table.concat(buffer, "\n")
+out_asm:write(final_product)
+
+out_asm:close()
+file:close()

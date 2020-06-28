@@ -1,0 +1,23 @@
+// Make sure R2 is initialized to 0
+@R2
+M=0
+
+(MULTIPLY)
+@R1
+D=M
+@DONE
+D;JEQ // if R1 == 0, then we're finished counting down
+
+// Add R0 to R2, R1 times.
+@R0
+D=M
+@R2
+M=M+D
+@R1
+M=M-1
+@MULTIPLY
+0;JMP
+
+(DONE)
+@DONE
+0;JMP

@@ -1,0 +1,32 @@
+s" stars.fs" included
+
+: piece ( n --)
+	2* 1- stars ;
+
+: row ( idx base --)
+	 tuck - tuck spaces piece spaces cr ;
+
+: prepare ( n inc -- n inc n index)
+	2dup dup 0< if abs swap then ;
+
+: triangle ( n inc --)
+	prepare do
+		over i row
+	dup +loop
+	2drop ;
+
+: diamond ( n --)
+	1 2dup
+	
+	triangle 
+	negate triangle ;
+
+
+: diamonds ( n --)
+	0 do 10 diamond loop ;
+
+5 diamonds
+	
+\ 5 1 triangle
+\ 5 -1 triangle
+\ .s

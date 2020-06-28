@@ -1,0 +1,4 @@
+: gcd ( a b -- gcd)
+	begin tuck mod ?dup while repeat ;
+
+

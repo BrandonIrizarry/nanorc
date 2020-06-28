@@ -1,0 +1,26 @@
+\ Problem 1
+\ First create a word named STARS which will print out n stars on the same
+\ line, given n on the stack:
+
+: star ( --)
+	42 emit ;
+
+: +stars ( n --)
+	0 do star loop ;
+
+: stars ( n --)
+	?dup 0= if exit then
+	+stars ;
+
+\ end definitions
+
+
+: test ( n --)
+	dup stars . cr ;
+
+10 test
+11 test
+8 test
+0 test
+3 test
+.s

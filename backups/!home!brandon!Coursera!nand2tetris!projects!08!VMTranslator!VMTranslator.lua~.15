@@ -1,0 +1,45 @@
+
+-- Process a VM file
+local file = assert(io.open(arg[1]))
+
+local filename = arg[1]:gsub(".*/", "")
+filename = filename:match("^[^%.]+")
+
+local init = require("commands").init
+
+local fn_name = "anon"
+local buffer = {}
+
+for line in file:lines() do
+	line = line:gsub("//.*", "")
+
+	-- If line is empty, or all whitespace, skip
+	if line:match("^%s*$") then
+		goto continue
+	end
+
+	-- See if we need to change the current function-name
+	local maybe_fn_name = line:match("^function (.-)")
+
+	if maybe_fn_name then
+		fn_name = maybe_fn_name
+	end
+
+	local accessed = init(filename, fn_name)
+
+	for token in line:gmatch("[%w_.:-]+") do
+		accessed = accessed[token]
+	end
+
+	buffer[#buffer + 1] = accessed
+	::continue::
+end
+
+local out_asm = assert(io.open(filename..".asm", "w"))
+
+buffer[#buffer + 1] = ""
+final_product = table.concat(buffer, "\n")
+out_asm:write(final_product)
+
+out_asm:close()
+file:close()

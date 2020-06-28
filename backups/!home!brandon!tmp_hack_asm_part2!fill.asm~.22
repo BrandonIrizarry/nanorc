@@ -1,0 +1,33 @@
+(LISTEN)
+@color // initialize color to white
+M=0
+@SCREEN 
+D=A
+@segment // initialize current segment to SCREEN
+M=D
+
+@KBD
+D=M
+@PAINT
+D;JEQ  // if no keypress, skip to painting step
+@color 
+M=-1 // if keypress, set the fill-color to black
+
+(PAINT)
+@segment
+D=M
+@24575 // last valid screen segment in memory
+D=D-A
+@LISTEN
+D;JGT
+@color
+D=M
+@segment
+A=M
+M=D // set the screen segment to the given color
+
+@segment
+M=M+1
+@PAINT
+0;JMP
+

@@ -1,0 +1,154 @@
+local headers = {
+	["stack effect"] = "What's the stack effect of the following word?"
+	["forth word"] = "What's the definition of the following word?"
+}
+
+local session = {
+day = 0,
+
+{
+rank=0,
+header="stack effect",
+question="U.",
+answer="( u — )",
+},
+
+{
+rank=0,
+header="forth word",
+question="U.",
+answer="Prints the unsigned single-length number, followed by a space."
+},
+
+local function printf (msg, ...)
+	io.write(string.format(msg, ...))
+end
+
+local function query (msg)
+	if msg then
+		io.write(msg)
+	end
+
+	io.write("[y/n]")
+
+	repeat
+		ans = io.read()
+	until ans == "y" or ans == "n"
+
+	return ans == "y"
+end
+
+local function ask (card)
+	print(headers[card.header])
+	print(card.question)
+
+	query("Enter 'y' to show answer")
+	print(
+
+	if good then
+		card.rank = card.rank + 1
+	else
+		card.rank = 0
+	end
+end
+
+--ask(session[1])
+
+
+
+--[[;
+UM*
+	( u1 u2 — ud )
+    Multiplies two single-length numbers. Returns a double-length result. All values are unsigned.
+
+UM/MOD
+	( ud u1 — u2 u3 )
+    Divides a double-length by a single-length number. Returns a single-length 
+	quotient u2 and remainder u3. All values are unsigned.
+
+U< 
+	( u1 u2 — f )
+    Leaves true if u1 < u2, where both are treated as single-length unsigned integers.
+
+HEX
+	( — )
+    Sets the base to sixteen.
+
+OCTAL
+	( — )
+    Sets the base to eight (available on some systems).
+
+DECIMAL
+	( — )
+    Sets the base to ten.
+
+<#
+	( — )
+    Begins the number conversion process.
+
+#
+( ud1 — ud2 ) Converts one digit and prepends it to the output character string. 
+    Always produces a digit — if you’re out of significant digits, you’ll still 
+    get a zero for every #.
+
+#S
+( ud1 — ud2 ) Converts the number until the result is zero. Always produces at 
+    least one digit (0 if the value is zero).
+
+HOLD
+( char — )
+    Inserts, at the current position in the character string being formatted, a character whose ASCII value is on the stack. HOLD (or a word that uses HOLD) must be used between <# and #>.
+SIGN
+( n — )
+    Prepends a minus sign to the output string if the top of stack is negative.
+#>
+( ud — addr len )
+    Completes number conversion by leaving the address and length of the string on the stack (these are the appropriate arguments for TYPE).
+D.
+( d — )
+    Prints the signed double-length number d, followed by one space.
+D.R
+( d u — )
+    Prints the signed double-length number d, right-justified within the field width u.
+D+
+( d1 d2 — d3 )
+    Adds two double-length numbers d1 and d2, returning the sum d3
+D-
+( d1 d2 — d3 )
+    Subtracts double-length number d2 from d1, returning the difference d3.
+DNEGATE
+( d1 — d2 )
+    Changes the sign of a double-length number.
+DMAX
+( d1 d2 — d3 )
+    Returns the maximum of two double-length numbers.
+DMIN
+( d1 d2 — d3 )
+    Returns the minimum of two double-length numbers.
+D=
+( d1 d2 — flag )
+    Returns true if d1 and d2 are equal.
+D0=
+    Returns true if d is zero.
+D<
+( d1 d2 — flag )
+    Returns true if d1 is less than d2. Both numbers are signed.
+DU<
+( ud1 ud2 — flag )
+    Returns true if ud1 is less than ud2. Both numbers are unsigned.
+M+
+( d1 n — d2 )
+    Adds double-length number d1 to a single-length number n. Returns double-length result d2.
+SM/REM
+( d n1 — n2 n3 )
+    Divide d1 by n1, giving the symmetric quotient n3 and the remainder n2. Input and output stack arguments are signed. An ambiguous condition exists if n1 is zero or if the quotient lies outside the range of a single-cell signed integer.
+FM/MOD
+( d n1 — n2 n3 )
+    Divide d1 by n1, giving the floored quotient n3 and the remainder n2. Input and output stack arguments are signed. An ambiguous condition exists if n1 is zero or if the quotient lies outside the range of a single-cell signed integer.
+M*
+( n1 n2 — d )
+    Multiplies two single-length numbers. Returns a double-length result. All values are signed.
+M*/
+d1 +n1 n2 — d2 )
+    Multiplies double-length number d1 by single-length positive number n1 and divides the triple-length result by single-length number n2. Returns double-length result d2. All values are signed.
+--]]

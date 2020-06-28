@@ -1,0 +1,22 @@
+\ Brandon C. Irizarry	1 June 2020
+
+\ 'game1' plays out the book's example.
+\ 'game2' is a second, made-up example.
+
+: game1
+	0 1000 trap
+	330 660 trap
+	440 550 trap
+	330 440 trap
+	391 391 trap ;
+
+391 game1
+
+: game2
+	." ANOTHER GAME:" cr
+	391 392 trap
+	390 391 trap 
+	391 391 trap ;
+
+391 game2
+

@@ -1,0 +1,23 @@
+local lfs = require "lfs"
+
+setmetatable(_ENV, {__index = function (_, nonexistent)
+	print(nonexistent, "does not exist")
+	os.exit()
+end})
+
+local tests = {
+	"BasicLoop.vm",
+	"../ProgramFlow/BasicLoop.vm",
+	"NestedCall",
+	"NestedCall/",
+	"../FunctionCalls/NestedCall/",
+	"../FunctionCalls/NestedCall"
+}
+
+local BASENAME_PATTERN = "(.-/?)([^/]+)/?$"
+
+for _, test in ipairs(tests) do
+	local prefix, endname = test:match(BASENAME_PATTERN))
+	print(type(prefix), type(endname))
+	print(
+end

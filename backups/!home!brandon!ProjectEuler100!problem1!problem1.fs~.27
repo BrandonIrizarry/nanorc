@@ -1,0 +1,24 @@
+\ Problem 1
+\ If we list all the natural numbers below 10 that are multiples of 3 or 5, we 
+\ get 3, 5, 6 and 9. The sum of these multiples is 23. Find the sum of all the 
+\ multiples of 3 or 5 below 1000.
+
+\ is n a multiple of k?
+: multiple ( n k --)
+	mod 0= ;
+
+\ is n a multiple of 3 or 5?
+: 3-or-5 ( n -- f)
+	dup 3 multiple swap 5 multiple or ;
+
+\ if n isn't a multiple of 3 or 5, change it to zero
+: filter ( n -- n | 0)
+	dup 3-or-5 and ;
+
+: maybe-add ( n x -- n + {0 | x})
+	filter + ;
+
+: main ( --)
+	0 1000 3 do i maybe-add loop ;
+
+main .

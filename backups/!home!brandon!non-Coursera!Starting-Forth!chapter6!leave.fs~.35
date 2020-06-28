@@ -1,0 +1,34 @@
+\ Problem 7
+\ In our discussion of LEAVE we gave an example which computed 6% compound 
+\ interest on a starting balance of $1000 for 20 years or until the balance had 
+\ doubled, whichever came first. Rewrite this definition so that it will expect a 
+\ starting balance and interest rate on the stack and will LEAVE when this 
+\ starting balance has doubled.
+
+
+: r% ( n x -- { x percent of n, rounded })
+	50 */ 1+ 2/ ;
+
+: printmsg ( n i -- n i )
+	." year" space dup .
+	3 spaces ." balance" space over .
+	cr ;
+
+: successmsg ( p y -- p y)
+	2dup swap ." balance=" . space ." more than doubled in " . ." years" cr ;
+
+: calculate ( Per Pri -- Per new-Pri)
+	2dup r% + ;
+
+: compound ( Pri Per --)
+	swap		\ prepare arguments for 'calculate'
+	dup 2* >r	\ inside the loop, 2P can be referenced as 'j'
+	
+	21 1 do
+		calculate
+		j over <= if i successmsg drop leave then
+		i printmsg drop
+	loop 2drop rdrop ;
+
+1000 6 compound
+.s

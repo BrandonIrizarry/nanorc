@@ -1,0 +1,18 @@
+
+
+: r% ( n x -- { x percent of n, rounded })
+	50 */ 1+ 2/ ;
+
+: printmsg ( n i -- n i )
+	." year" space dup .
+	3 spaces ." balance" space over .
+	cr ;
+
+: calculate ( percentage principal -- percentage new-principal)
+	2dup r% + ;
+
+: compound ( principal percentage --)
+	swap 21 1 do
+		calculate
+		i printmsg drop
+	loop 2drop ;

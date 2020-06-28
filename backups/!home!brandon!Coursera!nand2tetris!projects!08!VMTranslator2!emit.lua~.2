@@ -1,0 +1,8 @@
+
+local M = {}
+
+function M.emit (command, filename, fn_name)
+	if command == "push" or command == "pop" then
+		return function (segment)
+			if segment == "pointer" or segment == "static" or segment == "constant" or segment == "temp" then
+				

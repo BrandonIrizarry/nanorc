@@ -1,0 +1,57 @@
+s" ../testing.fs" included
+
+\ Problem 4
+\ 
+\ A palindromic number reads the same both ways. The largest palindrome made from 
+\ the product of two 2-digit numbers is 9009 = 91 × 99. Find the largest 
+\ palindrome made from the product of two 3-digit numbers.
+
+variable palindrome
+
+: ** ( n p -- n^p)
+	1 swap 0 ?do
+		over *
+	loop nip ;
+
+: power ( n -- 10^n)
+	10 swap ** ;
+
+: >accum ( n --)
+	palindrome +! ;
+
+: accum> ( --n)
+	palindrome @ ;
+
+: split ( n -- {reverse sequence of digits} #digits)
+	0 1 do
+		10 /mod ?dup if
+			else i leave
+	then loop ;
+
+: build ({reverse sequence of digits} #digits -- palindrome)
+	0 do
+		i power * >accum
+	loop accum> ;
+
+\ : split ( n -- {reverse sequence of digits)
+\ 	begin 10 /mod ?dup while repeat ;
+\ 
+\ : build ( {reverse sequence of digits} -- palindrome)
+\ 	0 0 do
+\ 		depth if	\ we can't do this.
+\ 			i power *  >accum
+\ 		else leave then loop
+\ 	palindrome @ ;
+\ 
+\ : compile ( n -- palindrome)
+\ 	split build ;
+\ 
+\ : good ( n -- f)
+\ 	dup >r compile r> = ;  \ 'build' uses the whole stack, so 'dup compile =' doesn't suffice.
+\ 
+\ : test ( n --)
+\ 	100 10 do
+\ 		dup i * good if
+\ 			i . ." begets a palindrome" cr leave then
+\	loop ;
+\ 

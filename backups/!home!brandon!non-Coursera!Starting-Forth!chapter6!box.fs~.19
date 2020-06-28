@@ -1,0 +1,15 @@
+\ Problem 2
+\ Next define BOX which prints out a rectangle of stars, given the width
+\ and height (number of lines), using the stack order ( width height --)
+
+: +box ( width height --)
+	0 do
+		dup stars cr \ 'stars' consumes 'width' each time
+	loop drop ;
+
+: box ( width height --)
+	?dup 0= if exit then \ avoid infinite loops
+	over 0= if exit then \ +box shouldn't print empty rows
+
+	+box ;
+

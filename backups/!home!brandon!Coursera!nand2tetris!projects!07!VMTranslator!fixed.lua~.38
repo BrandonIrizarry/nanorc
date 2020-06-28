@@ -1,0 +1,72 @@
+local M = {}
+
+local template = {
+	["push"] = [[
+
+// push %s %s
+@%s
+D=%s
+@SP
+A=M
+M=D
+@SP
+M=M+1]],
+
+	["pop"] = [[
+
+// pop %s %s
+@SP
+M=M-1
+A=M
+D=M
+@%s
+M=D
+]]
+}
+
+local register = {
+	["temp"] = {
+		["0"] = "R5",
+		["1"] = "R6",
+		["2"] = "R7",
+		["3"] = "R8",
+		["4"] = "R9",
+		["5"] = "R10",
+		["6"] = "R11",
+		["7"] = "R12"
+	},
+
+	["pointer"] = {
+		["0"] = "THIS",
+		["1"] = "THAT"
+	},
+
+	["static"] = setmetatable({}, {__index = function (_, arg)
+		return string.format("%s.%s", "<>", arg)
+	end}),
+
+	["constant"] = setmetatable({}, {__index = function (_, arg)
+		return arg
+	end})
+}
+
+M.push = function (name, filename)
+	local r = register[name][arg]
+
+	if filename then
+		r = r:gsub("<>", filename)
+	end
+
+	return setmetatable({}, {__index = function (_, arg)
+		return string.format(template["push"], name, arg, r,
+			name == "constant" and "A" or "M")
+	end})
+end
+
+M.pop = function (name)
+	return  setmetatable({}, {__index = function (_, arg)
+		return string.format(template["pop"], name, arg, register[name][arg])
+	end})
+end
+
+return M

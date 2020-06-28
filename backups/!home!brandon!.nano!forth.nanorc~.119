@@ -1,0 +1,23 @@
+### Brandon C. Irizarry
+###
+### A minimalist forth.nanorc. Mainly for catching common Forth blunders,
+### and for orienting the programmer.
+###
+### Based on the forth.nanorc file found at https://paste.xinu.at/wc17YG/
+
+syntax "forth" "\.(fs|4th|4mu)$"
+comment "\ "
+
+## Highlight interpreted statements.
+color brightyellow "."
+
+## Unhighlight a properly-formed definition.
+color white start="(^| ): " end="(^|[[:space:]])+;($|[[:space:]]+)"
+
+## Always highlight comments.
+color brightblue start="(^| )\([[:space:]]+" end="\)"
+color brightblue "\\[[:space:]]+.*$"
+
+## Strings etc.
+color red start="(^|[[:space:]]+)\.\"[[:space:]]+" end="(^|.)\""
+color green start="(^|[[:space:]]+)s\"[[:space:]]+" end="(^|.)\""

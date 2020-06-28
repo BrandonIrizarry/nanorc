@@ -1,0 +1,43 @@
+
+-- Process a VM file
+local file = assert(io.open(arg[1]))
+local filename = arg[1]:gsub("^.*/", "")
+filename = filename:match("^[^%.]+")
+
+
+local commands = require("commands").init(filename)
+
+
+local buffer = {}
+for line in file:lines() do
+	line = line:gsub("//.*", "")
+
+	-- If line is empty, or all whitespace, skip
+	if line:match("^%s*$") then
+		goto continue
+	end
+
+	local accessed = commands
+
+	for token in line:gmatch("%w+") do
+		accessed = accessed[token]
+	end
+
+	buffer[#buffer + 1] = accessed
+	::continue::
+end
+
+local out_asm = assert(io.open(filename..".asm", "w"))
+
+buffer[#buffer + 1] = ""
+--io.write(table.concat(buffer, "\n"))
+out_asm:write(table.concat(buffer, "\n"))
+
+out_asm:close()
+file:close()
+
+--print(commands["push"]["constant"]["3"])
+--print(commands["pop"]["temp"]["4"])
+--print(commands["pop"]["static"]["5"])
+--print(commands["pop"]["local"]["3"])
+--print(commands["add"])

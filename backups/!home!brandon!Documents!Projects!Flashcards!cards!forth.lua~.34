@@ -1,0 +1,53 @@
+data={
+	day=4,
+	Card{
+		0,
+		"u. (stack effect)",
+		"( u — )"
+	},
+	Card{
+		0,
+		"u. (what it does)",
+		"Prints the unsigned single-length number, followed by a space."
+	},
+	Card{
+		0,
+		"What stack effect does um* obey?",
+		"( u1 u2 — ud )"
+	},
+	Card{
+		0,
+		"What does um* do?",
+		"Multiplies two single-length unsigned numbers."
+	},
+	Card{
+		0,
+		"What kind of result(s) does um* return?",
+		"It returns a double-length unsigned result."
+	},
+	Card{
+		0,
+		"What stack effect does um/mod obey?",
+		"(ud u1 − u2-quot u3-rem)"
+	},
+	Card{
+		0,
+		"What does um/mod do?",
+		"It divides a double-length unsigned number by a single-length unsigned number."
+	},
+	Card{
+		0,
+		"What kind of result(s) does um/mod return?",
+		"It leaves a single-length unsigned quotient, then a single-length unsigned remainder."
+	},
+	Card{
+		1,
+		"What is the Unicode value of the symbol −?",
+		"2212"
+	},
+	Card{
+		1,
+		"How do I enter Unicode symbol 2212 in Nano?",
+		"Type Ctrl+Shift+u and then 2212."
+	},
+}

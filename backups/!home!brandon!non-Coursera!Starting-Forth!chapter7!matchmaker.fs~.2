@@ -1,0 +1,18 @@
+\ Problem 2
+\ 
+\ Since you now know that AND and OR employ bit logic, explain why the following 
+\ example must use OR instead of +
+\ 
+\ : MATCH
+\ 	humorous sensitive AND
+\ 	art-loving music-loving OR AND 
+\ 	smoking 0= AND IF
+\ 		." I have someone you should meet "
+\ 	THEN ;
+
+If I use +, then I can get overflow, and two truthy values like
+(use 4 bits as an example):
+
+1000 + 1000 = 1 0000
+
+which gets interpreted wrongly as false.

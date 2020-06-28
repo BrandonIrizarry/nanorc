@@ -1,0 +1,164 @@
+local constants = {
+	PUSH_CONSTANT = [[
+@%s
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+]],
+	PUSH_FIXED = [[
+@%s
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+]],
+	PUSH_VARIABLE = [[
+@%s
+D=A
+@%s
+A=D+M
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1
+]],
+	POP_FIXED = [[
+@SP
+M=M-1
+A=M
+D=M
+@%s
+M=D
+]],
+	POP_VARIABLE = [[
+@%s
+D=A
+@%s
+D=D+M
+@R13
+M=D
+@SP
+M=M-1
+A=M
+D=M
+@R13
+A=M
+M=D
+]],
+	ADD = [[
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=D+M
+]],
+	AND = [[
+@SP
+M=pM-1
+A=M
+D=M
+A=A-1
+M=D&M
+]],
+	OR = [[
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=D|M
+]],
+	NEG = [[
+@SP
+A=M-1
+M=-M
+]],
+	SUB = [[
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=M-D
+]],
+	NOT = [[
+@SP
+A=M-1
+M=!M
+]],
+	LABEL = "(%s$%s)",
+
+	GOTO = [[
+@%s$%s
+0;JMP
+]],
+	IF_GOTO = [[
+"@SP
+M=M-1
+A=M
+D=M
+@%s$%s
+D;JNE
+]]
+
+	FUNCTION = [[
+(%s)
+@%s
+]]
+	VMCOMMAND_PATTERN = "[:%.$_%w]+"
+}
+
+
+constants.EQ = constants.SUB..
+[[
+@SP
+A=M-1
+D=M
+M=-1
+@eq.%s
+D;JEQ
+@SP
+A=M-1
+M=0
+(eq.%s)
+]]
+
+constants.LT = constants.SUB..
+[[
+SP
+A=M-1
+D=M
+M=-1
+@lt.%s
+D;JLT
+@SP
+A=M-1
+M=0
+(lt.%s)
+]]
+
+constants.GT = constants.SUB..
+[[
+@SP
+A=M-1
+D=M
+M=-1
+@gt.%s
+D;JGT
+@SP
+A=M-1
+M=0
+(gt.%s)
+]]
+
+return constants
+
+

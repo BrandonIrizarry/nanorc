@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+SOURCE_FILE=$(basename $1)
+
+HACK_FILE=${SOURCE_FILE%%.*}
+
+echo $SOURCE_FILE $HACK_FILE
+#cat SOURCE_FILE | ./symbol_process | ./no_symbol/assemble > HACK_FILE

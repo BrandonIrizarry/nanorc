@@ -1,0 +1,10 @@
+s" divisor.fs" included
+
+: /divisor ( n -- smallest-divisor quotient)
+	dup divisor tuck / ;
+
+
+1983 /divisor swap . .
+
+: factors ( n -- list-of-factors)
+	

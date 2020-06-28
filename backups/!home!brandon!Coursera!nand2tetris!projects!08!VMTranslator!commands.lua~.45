@@ -1,0 +1,91 @@
+local M = {}
+
+local fixed = require "fixed"
+local nonfixed = require "nonfixed"
+local arith = require "arith"
+local branching = require "branching"
+
+function M.init ()
+	local fn_name = "*no_fn_name_set"
+	local filename = "*no_filename_set"
+	local index = 0
+
+	local function reset_function (name)
+		fn_name = name
+		index = 0
+	end
+
+	local function reset_filename (name)
+		filename = name
+		fn_name = "*no_fn_name_set"
+		index = 0"
+	end
+
+	local commands = {
+		["push"] = {
+			-- Commands for fixed segments
+			["constant"] = fixed.push("constant"),
+			["static"] = fixed.push("static", filename),
+			["pointer"] = fixed.push("pointer"),
+			["temp"] = fixed.push("temp"),
+
+			-- Commands for nonfixed segments
+			["local"] = nonfixed.push("local"),
+			["argument"] = nonfixed.push("argument"),
+			["this"] = nonfixed.push("this"),
+			["that"] = nonfixed.push("that")
+		},
+		["pop"] = {
+			-- Commands for fixed segments
+			["static"] = fixed.pop("static", filename),
+			["pointer"] = fixed.pop("pointer"),
+			["temp"] = fixed.pop("temp"),
+
+			-- Commands for nonfixed segments
+			["local"] = nonfixed.pop("local"),
+			["argument"] = nonfixed.pop("argument"),
+			["this"] = nonfixed.pop("this"),
+			["that"] = nonfixed.pop("that")
+		},
+
+		-- Arithmetic and logic commands
+		["add"] = arith.full_code["add"],
+		["and"] = arith.full_code["and"],
+		["or"] = arith.full_code["or"],
+		["neg"] = arith.full_code["neg"],
+		["sub"] = arith.full_code["sub"],
+		["not"] = arith.full_code["not"],
+
+		-- Branching commands
+		["label"] = branching.label(fn_name),
+		["goto"] = branching["goto"](fn_name),
+		["if-goto"] = branching["if-goto"](fn_name),
+
+		-- Function-call commands except 'call'
+		["function"] = fcall["function"](fn_name)
+		["return"] = fcall["return"](fn_name)
+	}
+
+	-- Commands that need to keep a running index for their unique labels
+	local dynamic = {
+		-- Comparison commands
+		["eq"] = arith.cmp("eq", fn_name, index)
+		["gt"] = arith.cmp("gt", fn_name, index)
+		["lt"] = arith.cmp["lt", fn_name, index)
+
+		-- The 'call' function-call command
+		["call"] = fcall["call"](fn_name, index)
+	}
+
+	setmetatable(commands, {__index = function (_, key)
+		index = index + 1
+		return dynamic[key]
+	}
+
+	return {
+		commands = commands,
+		set_fn_name = set_fn_name
+	}
+end
+
+return M

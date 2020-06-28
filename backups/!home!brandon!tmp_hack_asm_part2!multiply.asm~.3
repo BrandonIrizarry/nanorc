@@ -1,0 +1,19 @@
+// Assume all memory is initialized to 0.
+
+(MULTIPLY)
+@R1
+D=M
+@DONE
+D;JEQ // if multiplier is 0, 
+@R0
+D=M
+@R2
+M=M+D
+@R1
+M=M-1
+@MULTIPLY
+0;JMP
+
+(DONE)
+@DONE
+0;JMP

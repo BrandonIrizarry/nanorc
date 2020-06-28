@@ -1,0 +1,12 @@
+s" stars.fs" included
+
+
+: row ( idx base --)
+	over - tuck spaces stars spaces cr ;
+
+
+1 4 row
+2 4 row
+3 4 row
+4 4 row
+.s

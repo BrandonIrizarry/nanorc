@@ -1,0 +1,38 @@
+data={
+	day=0,
+	{
+		rank=0,
+		"U. (stack effect)",
+		"( u — )",
+	},
+
+	{
+		rank=0,
+		"U. (general)",
+		"Prints the unsigned single-length number, followed by a space."
+	},
+
+	{
+		rank=0,
+		"UM* (stack effect)",
+		"( u1 u2 — ud )"
+	},
+
+	{
+		rank=0,
+		"UM* (general)",
+		"Multiplies two single-length numbers. Returns a double-length result. All values are unsigned."
+	},
+
+	{
+		rank=0,
+		"What kind of result does UM* return?",
+		"It returns a double-length result."
+	},
+
+	{
+		rank=0,
+		"What kind of integer are the arguments and results of UM* interpreted as?",
+		"As unsigned integers."
+	}
+}

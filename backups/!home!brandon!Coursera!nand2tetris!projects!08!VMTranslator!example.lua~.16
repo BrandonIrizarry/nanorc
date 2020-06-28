@@ -1,0 +1,22 @@
+
+
+local text = [[
+~L:Roses are red,
+~L:violets are blue,
+~L:sugar is sweet,
+~L:and so are you!
+]]
+
+local function metadata ()
+	local filename = ""
+	local fn_name = ""
+	local index = 0
+
+	local function emit (line)
+		return line:gsub("~L", filename)
+	end
+
+	local set_filename (name)
+		filename = name
+	end
+end

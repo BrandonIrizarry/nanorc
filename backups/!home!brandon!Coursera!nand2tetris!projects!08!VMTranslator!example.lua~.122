@@ -1,0 +1,82 @@
+local lfs = require "lfs"
+
+setmetatable(_ENV, {__index = function (_, nonexistent)
+	error(string.format("nonexistent global '%s'", nonexistent), 2)
+end})
+
+local tests = {
+	["BasicLoop.vm"] = {
+		prefix = "",
+		realname = "BasicLoop",
+		extension = "vm"
+	},
+
+	["../ProgramFlow/BasicLoop.vm"] = {
+		prefix = "../ProgramFlow/",
+		realname = "BasicLoop",
+		extension = "vm"
+	},
+
+	NestedCall = {
+		prefix = "",
+		realname = "NestedCall",
+		extension = ""
+	},
+
+	["NestedCall/"] = {
+		prefix = "",
+		realname = "NestedCall",
+		extension = ""
+	},
+
+	["../FunctionCalls/NestedCall/"] = {
+		prefix = "../FunctionCalls/",
+		realname = "NestedCall",
+		extension = ""
+	},
+
+	["../FunctionCalls/NestedCall"] = {
+		prefix = "../FunctionCalls/",
+		realname = "NestedCall",
+		extension = ""
+	}
+}
+
+local BASENAME_PATTERN = "(.-/?)([^/]+)/?$"
+
+local function prefix_rest (input)
+--	local before, extension = input:match("(.*)%.(.*)$")
+
+	local prefix, rest = input:match(BASENAME_PATTERN)
+--	local realname, extension = rest:match("(.*)%.([^.]+)$")
+
+	return prefix, rest
+--	return prefix, realname, extension
+--	return before, extension
+end
+
+local function first_test ()
+	for test, should in pairs(tests) do
+--		local before, extension = parse_cli_input(test)
+		local a, b = prefix_rest(test)
+
+		print(test)
+		io.write(string.format("a=%s\nb=%s\n",a, b))
+		print()
+	end
+end
+
+first_test()
+
+local function main_test ()
+	for test, should in pairs(tests) do
+		local prefix, realname, extension = parse_cli_input(test)
+
+		print(test)
+		print("prefix=", prefix, "realname=", realname, "extension=", extension)
+		print()
+		assert(prefix == should.prefix)
+		assert(realname == should.realname)
+		assert(extension == should.extension)
+	end
+end

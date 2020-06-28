@@ -1,0 +1,14 @@
+s" divisor.fs" included
+
+: /divisor ( n -- smallest-divisor quotient)
+	dup divisor tuck / ;
+
+\ 1983 /divisor /divisor /divisor /divisor .s
+\ clearstack
+\ cr
+\ 64 /divisor /divisor /divisor .s
+
+: factors ( n -- list-of-factors)
+	begin /divisor dup 1 = until drop ;
+
+512 factors .s

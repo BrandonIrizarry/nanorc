@@ -1,0 +1,11 @@
+
+
+
+: last-verse ( --)
+	." No more bottles of beer on the wall, no more bottles of beer.
+	 	Go to the store, buy some more, 99 bottles of beer on the wall!" ;
+
+: dont-say-zero ( n -- n)
+	?dup if . ." bottles of beer on the wall." drop
+	else ." no more bottles of beer on the wall."
+	then ;

@@ -1,0 +1,12 @@
+s" divisor.fs" included
+
+: /divisor ( n -- smallest-divisor quotient)
+	dup divisor tuck / ;
+
+: factors ( n -- list-of-factors)
+	begin /divisor dup 1 = until drop ;
+
+: test ( n --)
+	factors .s clearstack cr ;
+
+1000000 test

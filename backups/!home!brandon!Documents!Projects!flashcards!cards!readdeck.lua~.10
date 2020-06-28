@@ -1,0 +1,10 @@
+
+
+
+
+local text = io.open("deck.txt"):read("a")
+
+for content in text:gmatch("(.-)*") do
+--	content:gsub("(%s+)(.-)$", "$2")
+	print(content)
+end

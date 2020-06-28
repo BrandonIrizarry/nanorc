@@ -1,0 +1,34 @@
+\ Problem 4
+\ 
+\ A palindromic number reads the same both ways. The largest palindrome made from 
+\ the product of two 2-digit numbers is 9009 = 91 × 99. Find the largest 
+\ palindrome made from the product of two 3-digit numbers.
+
+variable palindrome
+
+: ** ( n p -- n^p)
+	1 swap 0 ?do
+		over *
+	loop nip ;
+
+: power ( n -- 10^n)
+	10 swap ** ;
+
+: >accum ( n --)
+	palindrome +! ;
+
+: split ( n -- {reverse sequence of digits)
+	begin 10 /mod ?dup while repeat ;
+
+: build ( {reverse sequence of digits} -- palindrome)
+	0 0 do
+		depth if
+			i dup . power *  >accum
+		else leave then loop
+	palindrome @ ;
+
+: compile ( n -- palindrome)
+	split build ;
+
+: good ( n -- f)
+	dup compile = ;

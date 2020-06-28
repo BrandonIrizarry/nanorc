@@ -1,0 +1,34 @@
+local RANK = 1
+local QUESTION = 2
+local ANSWER = 3
+
+
+
+local function query (msg)
+	if msg then
+		io.write(msg)
+	end
+
+	io.write("[y/n]")
+
+	repeat
+		ans = io.read()
+	until ans == "y" or ans == "n"
+
+	return ans == "y"
+end
+
+local function ask (card)
+
+	query("Enter 'y' to show answer")
+	print(
+
+	if good then
+		card.rank = card.rank + 1
+	else
+		card.rank = 0
+	end
+end
+
+dofile("cards/forth.lua")
+

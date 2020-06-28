@@ -1,0 +1,13 @@
+local lfs = require "lfs"
+
+
+
+local tests = {
+	"BasicLoop.vm",
+	"../ProgramFlow/BasicLoop.vm",
+	"NestedCall",
+	"NestedCall/",
+	"../FunctionCalls/NestedCall/",
+	"../FunctionCalls/NestedCall"
+}
+

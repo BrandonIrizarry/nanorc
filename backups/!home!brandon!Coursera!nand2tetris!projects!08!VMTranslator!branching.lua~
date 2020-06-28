@@ -1,0 +1,10 @@
+
+
+local M = {}
+
+
+M.label = function (fn_name)
+	return setmetatable({}, {__index = function (_, arg)
+		return string.format("(%s$%s)", fn_name, arg)
+	end})
+end

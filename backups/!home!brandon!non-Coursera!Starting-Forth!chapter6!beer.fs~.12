@@ -1,0 +1,18 @@
+: last-verse ( --)
+	." No more bottles of beer on the wall, no more bottles of beer." cr
+	." Go to the store, buy some more, 99 bottles of beer on the wall!" cr ;
+
+: one-bottle
+	." One bottle of beer on the wall, one bottle of beer." cr
+	." Take one down, pass it around, one bottle of beer on the wall." cr ;
+
+: 99-bottles ( --)
+	0 99 do
+		i . ." bottles of beer on the wall, " i space ." bottles of beer," cr
+		." take one down, pass it around," cr
+		i 1- . ." bottles of beer on the wall." cr
+	-1 +loop
+
+	last-verse ;
+
+99-bottles

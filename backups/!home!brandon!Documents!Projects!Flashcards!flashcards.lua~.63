@@ -1,0 +1,89 @@
+local RANK = 1
+local QUESTION = 2
+local ANSWER = 3
+
+local function query (msg, menu)
+	if msg then
+		io.write(msg)
+	end
+
+	io.write("[y/n]")
+
+	repeat
+		ans = io.read()
+	until ans == "y" or ans == "n" or ans == " "
+
+	return ans == "y" or ans == " "
+end
+
+local function ask (card)
+	io.write("\n\n")
+
+	io.write("\n")
+	print(card[QUESTION])
+	query("Show answer?")
+
+	io.write("\n")
+	print(card[ANSWER])
+
+	io.write("\n")
+	if query("Did you get this one?") then
+		card[RANK] = card[RANK] + 1
+	else
+		card[RANK] = 0
+	end
+end
+
+local function examine (card)
+	print(string.format("rank=%d", card[RANK]))
+	print(string.format("question=%s", card[QUESTION]))
+	print(string.format("answer=%s", card[ANSWER]))
+	print()
+end
+
+-- Usage: lua flashcards.lua cards/forth.lua
+if not arg[1] then
+	print("Missing arg")
+	os.exit()
+end
+
+local filename = arg[1]
+dofile(filename) -- loads the 'data' table
+
+local function dosession ()
+	for _, card in ipairs(data) do
+		if data.day % math.tointeger(2^card[RANK]) == 0 then
+			ask(card)
+		end
+	end
+
+	-- For now, see what the session results in (when there are but a few cards)
+	for i, card in ipairs(data) do
+		examine(card)
+		if i == 10 then break end
+	end
+end
+
+-- Write everything back to the given file
+local buffer = {
+string.format([[
+data={
+	day=%s,]], data.day + 1)
+}
+
+for _, card in ipairs(data) do
+	buffer[#buffer + 1] =
+string.format([[
+	{
+		%d,
+		%s,
+		%s
+	},]], card[RANK], card[QUESTION], card[ANSWER])
+end
+
+buffer[#buffer + 1] = "}"
+buffer[#buffer + 1] = ""
+local result = table.concat(buffer, "\n")
+
+
+print(result)

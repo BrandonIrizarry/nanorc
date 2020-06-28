@@ -1,0 +1,12 @@
+
+
+@SCREEN
+D=M
+@segment
+M=D
+
+(LOOP)
+@segment
+D=M
+@24575
+D=D-A

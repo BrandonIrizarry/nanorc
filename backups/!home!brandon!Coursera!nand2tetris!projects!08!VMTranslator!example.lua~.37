@@ -1,0 +1,48 @@
+
+
+local text = [[
+1
+Roses are red,
+violets are blue,
+2
+sugar is sweet,
+and so are you!
+3
+Thus endeth the object.
+]]
+
+local extras = {
+	Roses = "Rosas",
+	are = "son",
+	red = "rojas",
+	object = "~L"
+}
+
+setmetatable(extras, {__index = function (_, key) return key end})
+
+local function metadata ()
+	local filename = ""
+	local fn_name = ""
+	local index = 0
+
+	local function emit (word)
+		local translation = extras[word]
+		return translation:gsub("~L", filename)
+	end
+
+	local function emit_from_text (name)
+		filename = name
+
+		for word in text:gmatch("%w+") do
+			print(emit(word))
+		end
+	end
+
+	return {
+		emit_from_text = emit_from_text
+	}
+end
+
+
+metadata().emit_from_text("poem")
+metadata().emit_from_text("lesson")

@@ -1,0 +1,13 @@
+\ Problem 8
+\ Define a word called ** that will compute exponential values, like this:
+\ 
+\    7 2 ** . 49 ok 
+\ 
+\ (seven squared)
+\ 
+\    2 4 ** . 16 ok 
+\ 
+\ (two to the fourth power)
+\ 
+\ For simplicity, assume positive exponents only (but make sure ** works correctly 
+\ when the exponent is one--the result should be the number itself).

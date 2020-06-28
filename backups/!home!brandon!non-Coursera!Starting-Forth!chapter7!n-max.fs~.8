@@ -1,0 +1,18 @@
+\ Problem 1
+\ 
+\ Veronica Wainwright couldn’t remember the upper limit for a signed single-length 
+\ number, and she had no book to refer to, only a Forth terminal. So she wrote a 
+\ definition called N-MAX, using a BEGIN… UNTIL loop. When she executed it, she 
+\ got 
+\
+\ ↵2147483647 ok
+\
+\ What was her definition?
+
+: n-max ( -- n)
+	0 begin 1+
+	dup 100000000 mod 0= if dup . then
+	dup 0< until 1- . ;
+
+
+n-max

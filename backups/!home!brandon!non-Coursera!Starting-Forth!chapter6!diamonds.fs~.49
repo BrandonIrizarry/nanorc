@@ -1,0 +1,37 @@
+s" stars.fs" included
+
+: piece ( n --)
+	2* 1- stars ;
+
+: row ( idx base --)
+	 tuck - tuck spaces piece spaces cr ;
+
+: +triangle ( start finish --)
+	over 1- -rot do
+		dup i row
+	loop drop ;		
+
+: debug ( n -- n)
+	dup . cr ;
+
+
+: triangle ( inc start finish --)
+	over 1- -rot do
+		dup debug i debug row
+	over +loop 2drop ;
+
+
+: prepare ( n down? -- input)
+	dup 0< if swap 1 tuck
+	else 1 -rot then ;
+
+
+5 -1 prepare
+.s
+\ 4 1 row
+\ 4 2 row
+\ 4 3 row
+\ 4 4 row
+\ .s
+\ 
+

@@ -1,0 +1,28 @@
+
+
+local M = {}
+
+
+M.label = function (fn_name)
+	return setmetatable({}, {__index = function (_, arg)
+		return string.format("(%s$%s)", fn_name, arg)
+	end})
+end
+
+M.goto = function (fn_name)
+	return setmetatable({}, {__index = function (_, arg)
+		return string.format([[
+@%s$%s
+0;JMP"]], fn_name, arg)
+	end})
+end
+
+M["if-goto"] = function (fn_name)
+	return setmetatable({}, {__index = function (_, arg)
+		return string.format([[
+@SP
+M=M-1
+A=M
+D=M
+@%s$%s
+D;JNE]]

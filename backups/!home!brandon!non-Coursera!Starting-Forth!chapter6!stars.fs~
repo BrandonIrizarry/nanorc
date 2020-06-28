@@ -1,0 +1,9 @@
+\ Problem 1
+\ First create a word named STARS which will print out n stars on the same
+\ line, given n on the stack:
+
+: star ( --)
+	42 emit ;
+
+: stars ( n --)
+	0 do star loop ;	

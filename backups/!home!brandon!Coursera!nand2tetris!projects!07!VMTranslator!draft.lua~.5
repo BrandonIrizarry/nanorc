@@ -1,0 +1,37 @@
+
+
+local commands = {
+	["push"] = {
+		["constant"] = true,
+		["static"] = true,
+		["pointer"] = true,
+		["temp"] = true,
+		["local"] = true,
+		["argument"] = true,
+		["this"] = true,
+		["that"] = true
+	},
+	["pop"] = {
+		["constant"] = true,
+		["static"] = true,
+		["pointer"] = true,
+		["temp"] = true,
+		["local"] = true,
+		["argument"] = true,
+		["this"] = true,
+		["that"] = true
+	},
+	["add"] = true,
+	["and"] = true,
+	["or"] = true,
+	["neg"] = true,
+	["sub"] = true,
+	["not"] = true,
+	["eq"] = true,
+	["gt"] = true,
+	["lt"] = true
+}
+
+print(commands["and"])
+
+type(commands["add"])

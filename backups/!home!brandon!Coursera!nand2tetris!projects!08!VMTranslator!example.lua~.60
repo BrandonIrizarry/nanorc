@@ -1,0 +1,18 @@
+local lfs = require "lfs"
+
+
+
+local tests = {
+	"BasicLoop.vm",
+	"../ProgramFlow/BasicLoop.vm",
+	"NestedCall",
+	"NestedCall/",
+	"../FunctionCalls/NestedCall/",
+	"../FunctionCalls/NestedCall"
+}
+
+local pattern = "^(.*/?)(.-)%.(.-)$"
+
+for _, t in ipairs(tests) do
+	print(t:match(pattern))
+end

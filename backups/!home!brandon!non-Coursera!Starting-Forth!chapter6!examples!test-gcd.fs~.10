@@ -1,0 +1,15 @@
+
+: test ( a b --)
+	gcd . cr ;
+
+14 35 test
+8 14 test
+27 200 test
+2048 2187 test
+
+999 300 test
+9999 300 test
+932 4002 test
+2018 520 test
+520 4 test
+2018 4 test

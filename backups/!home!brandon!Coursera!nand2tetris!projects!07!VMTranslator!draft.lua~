@@ -1,0 +1,32 @@
+
+
+local function static_code
+
+
+
+local static = setmetatable({}, __index = function (_, 
+
+
+
+local commands = {
+	["push"] = {
+		["constant"] = nil,
+		["static"] = nil,
+		["pointer"] = nil,
+		["temp"] = nil,
+		["local"] = nil,
+		["argument"] = nil,
+		["this"] = nil,
+		["that"] = nil
+	},
+	["pop"] = {},
+	["add"] = nil,
+	["and"] = nil,
+	["or"] = nil,
+	["neg"] = nil,
+	["sub"] = nil,
+	["not"] = nil,
+	["eq"] = nil,
+	["gt"] = nil,
+	["lt"] = nil
+}

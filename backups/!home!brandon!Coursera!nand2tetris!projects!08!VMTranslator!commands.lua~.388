@@ -1,0 +1,277 @@
+local M = {}
+
+
+	FIXED_POP = fixed "@SP M=M-1 A=M D=M @%s M=D ",
+	VAR_PUSH = var "@%s D=A @%s A=D+M D=M @SP A=M M=D @SP M=M+1 ",
+	VAR_POP = var "@%s D=A @%s D=D+M @R13 M=D @SP M=M-1 A=M D=M @R13 A=M M=D "
+
+
+-- end preamble
+local filename = ""
+
+local mt = {__index = function (metadata, arg)
+	local t = metadata.type
+
+	local register
+
+	if t[2] == "constant" then
+		register = arg
+
+		if t[1] == "push" then
+			return string.format("@%s D=A @SP A=M M=D @SP M=M+1 ", register)
+		end
+	elseif t[2] == "static" then
+		register = filename.."."..arg
+
+		if t[1] == "push" then
+			return string.format("@%s D=M @SP A=M M=D @SP M=M+1 ", register)
+		elseif t[1] == "pop" then
+			return string.format("@SP M=M-1 A=M D=M @%s M=D ", register)
+		end
+
+
+
+	elseif t[2] == "pointer" then
+		name = (arg == "0" and "THIS") or (arg == "1" and "THAT")
+	elseif t[2] == "temp" then
+		name = "R"..tostring(tonumber(arg) + 5)
+	end
+
+	if t[1] == "push" and t[2] == "constant" then
+		return string.format("@%s D=A @SP A=M M=D @SP M=M+1 ", arg)
+	elseif metadata.type == "push static" then
+		return string.format("@%s D=M @SP A=M M=D @SP M=M+1 ", filename.."."..arg)
+	elseif metadata.type == "push pointer" then
+		local name = (arg == "0" and "THIS") or (arg == "1" and "THAT")
+		return string.format("@%s D=M @SP A=M M=D @SP M=M+1 ", name)
+	elseif metadata.type == "push temp" then
+		return string.format("@R%s D=M @SP A=M M=D @SP M=M+1 ", tostring(tonumber(arg) + 5))
+	elseif metadata.type == "pop static" then
+		return string.format("@SP M=M-1 A=M D=M @%s M=D ", filename.."."..arg)
+	elseif metadata.type == "pop pointer" then
+		return string.format("@SP M=M-1 A=M D=M @%s M=D ", 
+
+end
+
+local keys = {
+
+	PUSH_STATIC = setmetatable({}, {__index = function (_, num)
+		
+
+	PUSH_POINTER = {
+		"@THIS D=M @SP A=M M=D @SP M=M+1 ",
+		"@THAT D=M @SP A=M M=D @SP M=M+1 ",
+	}
+
+	PUSH_TEMP = {
+		
+		"@R6 D=M @SP A=M M=D @SP M=M+1 ",
+		"@R7 D=M @SP A=M M=D @SP M=M+1 ",
+		"@R8 D=M @SP A=M M=D @SP M=M+1 ",
+		"@R9 D=M @SP A=M M=D @SP M=M+1 ",
+		"@R10 D=M @SP A=M M=D @SP M=M+1 ",
+		"@R11 D=M @SP A=M M=D @SP M=M+1 ",
+		"@R12 D=M @SP A=M M=D @SP M=M+1 ",
+	}
+
+
+local _commands = {
+	-- Derive code for pushing onto the stack from various memory segments
+	["push"] = {
+		["constant"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.CONST_PUSH.fmt_constant(arg)
+		end}),
+
+		["static"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.FIXED_PUSH.fmt_static(arg)
+		end}),
+
+		["pointer"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.FIXED_PUSH.fmt_pointer(arg)
+		end}),
+
+		["temp"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.FIXED_PUSH.fmt_temp(arg)
+		end}),
+
+		["local"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_PUSH.fmt_var(arg, "LCL")
+		end}),
+
+		["argument"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_PUSH.fmt_var(arg, "ARG")
+		end}),
+
+		["this"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_PUSH.fmt_var(arg, "THIS")
+		end}),
+
+		["that"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_PUSH.fmt_var(arg, "THAT")
+		end}),
+	},
+
+	-- Derive code for popping from the stack onto various memory segments
+	["pop"] = {
+		["static"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.FIXED_POP.fmt_static(arg)
+		end}),
+
+		["pointer"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.FIXED_POP.fmt_pointer(arg)
+		end}),
+
+		["temp"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.FIXED_POP.fmt_temp(arg)
+		end}),
+
+		["local"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_POP.fmt_var(arg, "LCL")
+		end}),
+
+		["argument"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_POP.fmt_var(arg, "ARG")
+		end}),
+
+		["this"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_POP.fmt_var(arg, "THIS")
+		end}),
+
+		["that"] = setmetatable({}, {__index = function (_, arg)
+			return snippets.VAR_POP.fmt_var(arg, "THAT")
+		end}),
+	},
+
+	-- Arithmetic and logic commands
+	["add"] = "@SP M=M-1 A=M D=M A=A-1 M=D+M ",
+	["and"] = "@SP M=M-1 A=M D=M A=A-1 M=D&M ",
+	["or"] = "@SP M=M-1 A=M D=M A=A-1 M=D|M ",
+	["neg"] = "@SP A=M-1 M=-M ",
+	["sub"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ",
+	["not"] = "@SP A=M-1 M=!M ",
+
+	-- 'Incomplete' commands
+	["eq"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$eq.~I D;JEQ @SP A=M-1 M=0 (~F$eq.~I) ",
+
+	["lt"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$lt.~I D;JLT @SP A=M-1 M=0 (~F$lt.~I) ",
+
+	["gt"] = "@SP M=M-1 A=M D=M A=A-1 M=M-D ".. -- code for 'sub'
+		"@SP A=M-1 D=M M=-1 @~F$gt.~I D;JGT @SP A=M-1 M=0 (~F$gt.~I) ",
+
+	-- next ones: goto, label, and if-goto
+	["label"] = setmetatable({}, {__index = function (_, arg)
+		return string.format("(~F$%s)", arg)
+	end}),
+
+	["goto"] = setmetatable({}, {__index = function (_, arg)
+		return string.format("@~F$%s 0;JMP", arg)
+	end}),
+
+	["if-goto"] = setmetatable({}, {__index = function (_, arg)
+		return string.format("@SP M=M-1 A=M D=M @~F$%s D;JNE", arg)
+	end}),
+
+	["function"] = setmetatable({}, {__index = function (_, arg)
+		local keys = {["~F"] = arg}
+		return setmetatable(keys, {__index = 
+
+}
+
+-- keys
+--[[
+local filename = {}
+local fn_name = {}
+local index = {}
+
+local metadata = {
+	[filename] = "",
+	[fn_name] = "",
+	[index] = 0
+}
+
+
+local commands = setmetatable(metadata, {__index = function (m, cmd)
+	local partial = _commands[cmd]
+]]
+
+--[[ TODO: we may have to accept that 'commands' can return an incomplete 
+	command (i.e., one with ~F and/or ~I tokens inside it); then, our actual 
+	commands table is an empty table {} whose metatable's __index metamethod 
+	looks up an answer in the original commands table (say we now call it 
+	'_commands'), and then does the substitution inside the __index 
+	function, updates the metadata table accordingly (can that empty table 
+	{} hold the metadata?) and return the completed string. 
+	(Come to think of it, the proxy commands table (which'll be called 'commands')
+	can hold the metadata, since we only set that metatable _once_, and not 
+	pretend to give one client table multiple metatables, which is impossible. 
+	That would be a neat solution :) Let's see, tomorrow/next time.]]
+
+
+local metadata = {
+	filename = "",
+	current_function = "",
+	index = 0,
+	commands = _commands,
+
+	derive = function (self, line)
+		local result = self.commands
+
+		local asm_comment = "// "
+
+		for token in line:gmatch("[:%.$_%w]+") do -- vm-command pattern
+			result = result[token]
+			asm_comment = asm_comment..token.." "
+		end
+
+		return result, asm_comment
+	end,
+}
+print(metadata:derive("push local 3"))
+print(metadata:derive("push static 0"))
+print(metadata:derive("goto FUNTIME"))
+
+
+
+-- client code (testing)
+--[[
+local function translate(line, c)
+	local running = c
+	local asm_comment = "// "
+
+	local vm_command_pattern = "[:%.$_%w]+"
+
+	for token in line:gmatch(vm_command_pattern) do
+		running = running[token]
+		asm_comment = asm_comment..token.." "
+	end
+
+	local code = running:gsub(" ", "\n")
+	return string.format("%s\n%s", asm_comment, code)
+end
+
+local function real_thing ()
+	if not arg[1] then
+		print("Missing VM file")
+		os.exit()
+	end
+
+	local filename = arg[1]:gsub(".*/", "") -- eliminate path to file
+	local c = init(filename:match("^[^%.]+")) -- keep only before dot
+
+	local file = assert(io.open(arg[1]))
+
+	for line in file:lines() do
+		line = line:gsub("//.*", "") -- delete any comments on the line
+
+		-- if line is empty, or all whitespace, skip
+		if line:match("^%s*$") then
+			goto continue
+		end
+
+		print(translate(line, c))
+		::continue::
+	end
+end
+]]

@@ -1,0 +1,4 @@
+s" divisor.fs" included
+
+: /divisor ( -- n smallest-divisor quotient)
+	dup divisor tuck / ;

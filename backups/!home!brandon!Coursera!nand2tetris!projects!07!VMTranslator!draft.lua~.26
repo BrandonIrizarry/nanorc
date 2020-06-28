@@ -1,0 +1,68 @@
+local filename = "draft.vm"
+
+local mt_const = setmetatable({}, {__index = function (_, arg)
+	local template = [[
+// push constant %s
+@%s
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1]]
+
+	return string.format(template, arg, arg)
+end})
+
+local mt_static = setmetatable({}, {__index = function (_, arg)
+	local template = [[
+// push static %s
+@%s.%s
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1]]
+
+	return string.format(template, arg, filename, arg)
+end})
+local commands = {
+	["push"] = {
+		["constant"] = mt_const,
+		["static"] = mt_static,
+		["pointer"] = true,
+		["temp"] = true,
+		["local"] = true,
+		["argument"] = true,
+		["this"] = true,
+		["that"] = true
+	},
+	["pop"] = {
+		["constant"] = true,
+		["static"] = true,
+		["pointer"] = true,
+		["temp"] = true,
+		["local"] = true,
+		["argument"] = true,
+		["this"] = true,
+		["that"] = true
+	},
+	["add"] = true,
+	["and"] = true,
+	["or"] = true,
+	["neg"] = true,
+	["sub"] = true,
+	["not"] = true,
+	["eq"] = true,
+	["gt"] = true,
+	["lt"] = true
+}
+
+--print(commands["and"])
+
+--print(type(commands["add"]))
+--print(type(commands["push"]))
+print(commands["push"]["constant"]["3"])
+print(commands["push"]["constant"]["12"])
+print(commands["push"]["static"]["5"])
