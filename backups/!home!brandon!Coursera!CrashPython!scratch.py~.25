@@ -1,6 +1,0 @@
-punctuations = '''!()-[]{};:'"\,<>./?@#$%^&*_~'''
-
-def rempunct(word):
-  return "".join([letter for letter in word if letter not in punctuations])
-
-print(rempunct("add."))

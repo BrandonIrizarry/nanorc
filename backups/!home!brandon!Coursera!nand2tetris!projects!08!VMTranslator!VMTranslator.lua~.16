@@ -1,8 +1,0 @@
-
-
-
-local metadata = require "commands"
-
-
-local basename = filepath:gsub(".*/", "")
-local filename = basename:match("[^.]+")

@@ -1,8 +1,0 @@
-
-
-: poem
-	cr 11 1 do i . ." little "
-	i 3 mod 0= if ." indians " cr then loop
-	." indian boys. " ;
-
-poem

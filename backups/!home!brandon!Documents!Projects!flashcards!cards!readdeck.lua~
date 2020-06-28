@@ -1,5 +1,0 @@
-
-
-
-
-local text = io.read("deck.txt"):read("a")

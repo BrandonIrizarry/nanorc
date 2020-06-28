@@ -1,7 +1,0 @@
-U.
-( u — )
-    Prints the unsigned single-length number, followed by a space.
-
-UM*
-( u1 u2 — ud )
-    Multiplies two single-length numbers. Returns a double-length result. All values are unsigned.

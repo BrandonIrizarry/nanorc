@@ -1,8 +1,0 @@
-: 3dup ( a b c -- a b c a b c)
-	dup 2over rot ;
-
-: within? ( n lo hi -- f)
-	rot swap over > -rot <= and ;
-
-: endpoint? ( n lo hi -- f)
-	rot swap over = -rot = or ;
